@@ -64,6 +64,33 @@ app.post("/append-row", async (req, res) => {
   }
 });
 
+
+// Read rows from sheet
+app.post("/read-rows", async (req, res) => {
+  try {
+    const { sheet, range } = req.body;
+
+    if (!SHEETS[sheet]) {
+      return res.status(400).json({ error: "Invalid sheet" });
+    }
+
+    const readRange = range || "A1:Z1000"; // default safe range
+
+    const result = await sheets.spreadsheets.values.get({
+      spreadsheetId: SHEETS[sheet],
+      range: readRange
+    });
+
+    res.json({
+      rows: result.data.values || []
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to read rows" });
+  }
+});
+
+
 // ================================
 // START SERVER
 // ================================
